@@ -42,11 +42,11 @@ const resolvers = {
       return { token, user };
     },
         // saves book to authenticated user account
-    saveBook: async (parent, { input }, context) => {
+    saveBook: async (parent, { authors, description, bookId, image, link, title }, context) => {
       if (context.user) {
         const updatedUser = await User.findByIdAndUpdate(
           context.user._id,
-          { $push: { savedBooks: input } },
+          { $push: { savedBooks: authors, description, bookId, image, link, title } },
           { new: true, runValidators: true }
         );
         return updatedUser;
