@@ -17,12 +17,24 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+const saveBook = (bookToSave, token) => {
+  return fetch('/api/books', {
+    method: 'POST',
+    body: JSON.stringify(bookToSave),
+    headers: {
+      'Content-Type': 'application/json',
+      authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 
 const client = new ApolloClient({
   link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 });
 
+export { saveBook };
 export default client;
 
 

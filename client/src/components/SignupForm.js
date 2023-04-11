@@ -1,20 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
 import { useMutation } from "@apollo/client";
-import { gql } from "@apollo/client";
+import { ADD_USER } from "../utils/queries";
 import Auth from "../utils/auth";
 
-const SIGNUP_USER = gql`
-  mutation signup($username: String!, $email: String!, $password: String!) {
-    signupUser(username: $username, email: $email, password: $password) {
-      token
-      user {
-        _id
-        username
-      }
-    }
-  }
-`;
 
 const SignupForm = () => {
   // set initial form state
@@ -28,9 +17,15 @@ const SignupForm = () => {
   // set state for alert
   const [showAlert, setShowAlert] = useState(false);
 
-  const [signupUser, { error }] = useMutation(SIGNUP_USER, {
-    onError: () => setShowAlert(true),
-  });
+  const [addUser, { error }] = useMutation(ADD_USER);
+
+  useEffect(() => {
+    if (error) {
+      setShowAlert(true);
+    } else {
+      setShowAlert(false);
+    }
+  }, [error]);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -48,12 +43,14 @@ const SignupForm = () => {
     }
 
     try {
-      const { data } = await signupUser({ variables: { ...userFormData } });
-
-      Auth.login(data.signupUser.token);
+      const { data } = await addUser({ variables: { ...userFormData } });
+      console.log(data);
+      Auth.login(data.addUser.token);
     } catch (err) {
-      console.error(err);
+      console.log(err);
       setShowAlert(true);
+      console.log("userFormData:", userFormData);
+      console.log("addUser:", addUser);
     }
 
     setUserFormData({

@@ -31,11 +31,12 @@ export const GET_ME = gql`
             username
             email
             SavedBooks {
-                bookId
                 authors
                 description
-                title
+                bookId
                 image
+                link
+                title
             }
         }
     }
@@ -58,6 +59,7 @@ export const SAVE_BOOK = gql`
     }
 `;
 
+
 export const REMOVE_BOOK = gql`
     mutation removeBook($bookId: ID!) {
         removeBook(bookId: $bookId) {
@@ -70,9 +72,8 @@ export const REMOVE_BOOK = gql`
                 description
                 title
                 image
+                link
             }
         }
     }
 `;
-
-
