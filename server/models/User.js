@@ -1,40 +1,58 @@
-const mongoose = require('mongoose');
-const { Schema } = require('mongoose');
+const { Schema, model } = require("mongoose");
+const bcrypt = require("bcrypt");
+
+
+const BookSchema = require ("./Book");
+
 
 const UserSchema = new Schema({
-    username: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    match: [/.+@.+\..+/, "Must use a valid email address"],
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 5,
+  },
+  savedBooks: [BookSchema],
+
+      authors: [{ type: String }],
+},
+   {
+    toJSON: {
+        virtuals: true,
     },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        match: [/.+@.+\..+/, 'Must use a valid email address'],
-    },
-    password: {
-        type: String,
-        required: true,
-        minlength: 5,
-    },
-    savedBooks: [
-        {
-            bookId: {
-                type: String,
-                required: true,
-                unique: true,
-            },
-            authors: [String],
-            description: String,
-            title: String,
-            image: String,
-            link: String,
-        },
-    ],
+});
+
+UserSchema.pre('save', async function (next) {
+    if (this.isNew || this.isModified('password')) {
+        const saltRounds = 10;
+        this.password = await bcrypt.hash(this.password, saltRounds);
+    }
+
+    next();
+});
+
+// custom method to compare and validate password for logging in
+UserSchema.methods.isCorrectPassword = async function (password) {
+    return bcrypt.compare(password, this.password);
+};
+
+//when we query a user, we'll also get another field called `bookCount` with the number of saved books we have
+UserSchema.virtual('bookCount').get(function () {
+    return this.savedBooks.length;
 });
 
 
-module.exports = User = mongoose.model('User', UserSchema);
+const User = model("User", UserSchema);
 
+module.exports = User ;

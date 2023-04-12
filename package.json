@@ -13,11 +13,12 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
-        "concurrently": "^5.1.0"
+        "concurrently": "^5.1.0",
+        "graphql-playground-middleware-express": "^1.7.23"
     },
     "dependencies": {
         "@apollo/client": "^3.7.11",
-        "graphql": "^16.6.0",
-        "apollo-server-express": "^3.5.0"
+        "apollo-server-express": "^3.5.0",
+        "graphql": "^16.6.0"
     }
 }

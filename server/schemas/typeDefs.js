@@ -46,4 +46,6 @@ const typeDefs = gql`
         removeBook(bookId: String!): User
     }
 `
+
+db.users.createIndex( { username: 1 }, { unique: true } )
 module.exports = typeDefs;
