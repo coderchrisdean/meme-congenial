@@ -1,7 +1,7 @@
 
 const { AuthenticationError } = require ('apollo-server-express'); //import from apollo-server-express
-const { signToken } = require('../utils/auth'); // import from auth.js
 const { User } = require("../models"); //import User object from models
+const { signToken } = require('../utils/auth'); // import from auth.js
 
 // resolvers function
 
@@ -11,9 +11,11 @@ const resolvers = {
     // fetch data from authenticated user
     me: async (parent, args, context) => {
       if (context.user) { // if user is authenticated return savedBooks results
-        return await User.findById(context.user._id).populate("savedBooks");
+        const userData = await User.findOne({ _id: context.user._id }).select("-__v -password");
+      
+        return userData;
       }
-      throw new Error("You need to be logged in.");
+      throw new AuthenticationError("You need to be logged in.");
     },
   },
 // resolver functions for modifying database
@@ -36,22 +38,22 @@ const resolvers = {
       return { token, user };
     },
         // creates a new user account
-    addUser: async (parent, { username, email, password }) => {
-      const user = await User.create({ username, email, password });
+    addUser: async (parent, args) => {
+      const user = await User.create(args);
       const token = signToken(user);
       return { token, user };
     },
         // saves book to authenticated user account
-    saveBook: async (parent, { authors, description, bookId, image, link, title }, context) => {
+    saveBook: async (parent, { newBook },  context) => {
       if (context.user) {
         const updatedUser = await User.findByIdAndUpdate(
-          context.user._id,
-          { $push: { savedBooks: authors, description, bookId, image, link, title } },
+          { _id: context.user._id, },
+          { $push: { savedBooks: newBook } },
           { new: true, runValidators: true }
         );
         return updatedUser;
       }
-      throw new Error("You must be logged in.");
+      throw new AuthenticationError("You must be logged in.");
     },
         // removes book from authenticated user list
     removeBook: async (parent, { bookId }, context) => {
